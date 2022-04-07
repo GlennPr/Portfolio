@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7a8713c22cfb8d4e8d75546cb42bd62, type: 3}
+  m_Name: EditorTools_RenderOrderSettings_DATA
+  m_EditorClassIdentifier: 
+  Materials:
+  - {fileID: 2100000, guid: fc69a2ad54f177148aa34492e8a0fc1f, type: 2}
+  - {fileID: 2100000, guid: 29e20b5e9fb07134cbf86e26067a64a9, type: 2}
+  - {fileID: 2100000, guid: f0007d96e3284464db2f554faa36f76f, type: 2}
+  - {fileID: 2100000, guid: d20c770de012e1b4493866992f85357d, type: 2}
+  - {fileID: 2100000, guid: 5be291f5ab8e8f0489d99f33d67dfb3f, type: 2}
+  - {fileID: 2100000, guid: fa53c831cd9a56c42b3a2eaac01fff6b, type: 2}
+  - {fileID: 2100000, guid: 4a2ce66d15889074382a16a5430fe48f, type: 2}
+  - {fileID: 2100000, guid: 49dedc015e8be4d4d82fc56275b3bd4e, type: 2}
+  Shaders: []
+  ShadersRenderQueue: 
+  GroupNames:
+  - Environment
+  - UI
+  - Effects
+  GroupColors:
+  - {r: 0.1907718, g: 0.8867924, b: 0.18823427, a: 1}
+  - {r: 0.8207547, g: 0.17421682, b: 0.23796849, a: 1}
+  - {r: 0.7924528, g: 0.063545756, b: 0.6798238, a: 1}
+  Slots:
+  - MaterialIndex: 0
+    ShaderIndex: -1
+    GroupIndex: 0
+  - MaterialIndex: 1
+    ShaderIndex: -1
+    GroupIndex: -1
+  - MaterialIndex: 2
+    ShaderIndex: -1
+    GroupIndex: 2
+  - MaterialIndex: 3
+    ShaderIndex: -1
+    GroupIndex: 2
+  - MaterialIndex: 4
+    ShaderIndex: -1
+    GroupIndex: 1
+  - MaterialIndex: 5
+    ShaderIndex: -1
+    GroupIndex: -1
+  - MaterialIndex: 6
+    ShaderIndex: -1
+    GroupIndex: -1
+  - MaterialIndex: 7
+    ShaderIndex: -1
+    GroupIndex: 0
