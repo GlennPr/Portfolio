@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e00d9cdb91c82164e83bc1c49bd116c8, type: 3}
+  m_Name: Gabriel
+  m_EditorClassIdentifier: 
+  _sprite: {fileID: 21300000, guid: c5116377a2dc7de48b2747a0f1668fcd, type: 3}
+  _description: angelic warrior
+  _attack: 200
+  _defence: 200
+  _types:
+  - {fileID: 11400000, guid: 85ef419a7be866d488cec6a8a719b595, type: 2}
+  _statuses:
+  - _amount: 100
+    _status: {fileID: 11400000, guid: c08faa62602d92c4988550a24c906e17, type: 2}
+    _targets:
+    - {fileID: 11400000, guid: d79535e52d3769b46ac5f59c70b3220d, type: 2}
+    - {fileID: 11400000, guid: 36adc396f52135641813be595e130ca4, type: 2}

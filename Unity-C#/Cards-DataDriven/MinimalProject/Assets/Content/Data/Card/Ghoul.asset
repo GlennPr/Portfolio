@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e00d9cdb91c82164e83bc1c49bd116c8, type: 3}
+  m_Name: Ghoul
+  m_EditorClassIdentifier: 
+  _sprite: {fileID: 21300000, guid: e4b78717d406f9847affee63f24c3681, type: 3}
+  _description: a vile creature
+  _attack: 100
+  _defence: 50
+  _types:
+  - {fileID: 11400000, guid: 291f17ecdcbf0d449b7ffce4d0543373, type: 2}
+  _statuses:
+  - _amount: 50
+    _status: {fileID: 11400000, guid: 92942ecbbe1ef8441be8cf6d678acc1b, type: 2}
+    _targets:
+    - {fileID: 11400000, guid: 73d76fb6c06368741aa4fd657f213a62, type: 2}
+    - {fileID: 11400000, guid: a8e204cd537ca404a8994cd94453d490, type: 2}
