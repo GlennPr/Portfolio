@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c7d9422767096044973de4b9e195433, type: 3}
+  m_Name: ParametersB
+  m_EditorClassIdentifier: 
+  _density: 1
+  _ambientAmount: 0.033
+  _lifeTime: 2
+  _sourceBlurRadius: 0.05
+  _colorTexture: {fileID: 2800000, guid: 9c3fc24c75f549f40814b793483c1273, type: 3}
+  _particleFill: 1
+  _brightnessRandomness: 0.25
+  _brightnessLag: 0.5
+  _colorLag: 0.5
+  _colorOverLife: 0
+  _sourceModulateColor: 0
+  _randomAmbientColor: 1
+  _useSpawnColor: 1
+  _sourceWeight: 1
+  _depthModulateBrightness: 0
+  _sourceGlow: 1
+  _sourceModulateFill: 0
+  _sourceModulateBrightness: 0
+  _sourceModulateSize: 0
+  _sourceAttraction: 0.005
+  _depthModulateSize: 0
+  _size: 0.0055
+  _sizeLag: 0.5
+  _sizeRandomness: 0.25
+  _sizeRandomness2: 0.147
+  _scaleInLifetimePercentage: 0.1
+  _scaleOutLifetimePercentage: 0.1
+  _inertia: 0.177
+  _useMotionVectors: 1
+  _motionVectorRandomness: 0.172

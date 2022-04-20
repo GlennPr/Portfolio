@@ -1,0 +1,408 @@
+#pragma kernel Reset
+#pragma kernel Update
+#pragma kernel Copy
+
+#include "UnityCG.cginc"
+#include "../Includes/SimplexNoise3D.cginc"
+#include "../Includes/Hash.cginc"
+
+#define PI 3.141592
+#define s3 1.73205080 
+#define GAMMA 2.2
+
+//got to keep a multiple of 128 bit stride
+//https://developer.nvidia.com/content/understanding-structured-buffer-performance
+
+struct Particle
+{
+	float2 Position;
+	float ColorPhase;
+	float Age;
+
+	float2 Velocity;
+	float MaxAge;
+	float Fill;
+
+	float3 Color;
+	float SpawnColorPhase;
+
+	float2 SpawnPosition;
+	float Brightness;
+	float Size;
+};
+
+
+// 16
+struct Randoms 
+{
+	float Randoms[13];
+	float3 SphereRandom;
+};
+
+RWStructuredBuffer<Particle> ParticleBuffer;
+
+Texture2D<half4> Source;
+SamplerState samplerSource;
+
+Texture2D<fixed4> Colors;
+SamplerState samplerColors;
+
+Texture2D<fixed4> BlurredSource;
+SamplerState samplerBlurredSource;
+
+StructuredBuffer<Randoms> RandomBuffer;
+
+
+CBUFFER_START(Params)
+
+uint InstanceCount;
+float _RegionPadding;
+
+float DeltaTime;
+
+float Inertia;
+
+float _UseMotionVectors;
+float _MotionVectorRandomness;
+
+float NoiseOffset;
+float Time;
+float LifeTime;
+float EmitRandomness;
+float AmbientAmount;
+float _SourceGlow;
+
+float _SourceModulateFill;
+float _SourceModulateBrightness;
+float _DepthModulateBrightness;
+float _DepthModulateSize;
+float _SourceModulateSize;
+float _SourceAttraction;
+
+float _Size;
+float _SizeLag;
+float _SizeRandomness;
+float _SizeRandomness2;
+float _ScaleInLifetimePercentage;
+float _ScaleOutLifetimePercentage;
+float _Density;
+float _ParticleFill;
+float _BrightnessRandomness;
+float _BrightnessLag;
+float _ColorLag;
+float _GradientWidth;
+float _ColorOverLife;
+float _SourceModulateColor;
+float _UseSpawnColor;
+float _RandomAmbientColor;
+
+float2 _BlurredSourceEpsilon;
+float2 _BlurredSourceEpsilonLarge;
+float2 _SourceTextureRes;
+float4 _Region;
+
+CBUFFER_END
+
+float Random(in uint id, in uint slot) {
+	return RandomBuffer[id].Randoms[slot];
+}
+
+
+float GetProgress(in float edge0, in float edge1, in float x) {
+	return saturate((x - edge0) / (edge1 - edge0));
+}
+
+float2 PositionToSourceUV(in float2 position)
+{
+	float x = GetProgress(_Region.x, _Region.z, position.x);
+	float y = GetProgress(_Region.y, _Region.w, position.y);
+	return float2(x, y);
+}
+
+uint2 GetPixelPos(in float2 p)
+{
+	return floor(PositionToSourceUV(p) * _SourceTextureRes);
+}
+
+float4 GetSource(in float2 p)
+{
+	return Source[GetPixelPos(p)];
+	//return Source.SampleLevel(samplerSource, PositionToSourceUV(p), 0);
+}
+
+/*
+float GetBlurred(in float3 p)
+{
+	return BlurredSource.SampleLevel(samplerBlurredSource, PositionToSourceUV(p), 0).x;
+}*/
+
+
+
+float2 RandomCameraRegionPoint(in uint id)
+{
+	//TODO: better, 2D hash
+	float2 p = hash22(float2((float)id / InstanceCount, Time));
+
+	p = lerp(_Region.xy, _Region.zw, p);
+	//add some padding
+	float2 center = (_Region.xy + _Region.zw) * 0.5;
+	p = center + (p - center) * (1 + _RegionPadding);
+
+	//p.x = _Region.x +0.1;
+
+	//p = lerp(_Region.xw, _Region.zw, (float)id / InstanceCount);
+	//p.x = -1.8;
+
+
+	return p;
+}
+
+void ResetParticle(inout Particle particle, in uint id)
+{
+	float maxAge = (Random(id, 0) + 0.5) * LifeTime;
+
+	float2 p = RandomCameraRegionPoint(id);
+	bool atValidLocation = true;
+
+	if (Random(id, 1) >= AmbientAmount) 
+	{
+		uint2 pixelPos = GetPixelPos(p);
+
+		float sourceBrightness = Source[pixelPos].x;
+
+		if (_SourceGlow > 0) {
+			//float blurred = BlurredSource.SampleLevel(samplerBlurredSource, uv, 0).x;
+			float blurred = BlurredSource[pixelPos].x;
+			sourceBrightness = max(sourceBrightness, blurred * _SourceGlow);
+		}
+
+		// try and get particles to favor position with a stronger sourceBrightness 
+		float randomThreshold = hash21(float2((float)id / InstanceCount, Time));
+		atValidLocation = sourceBrightness > randomThreshold;
+
+		particle.SpawnColorPhase = Random(id, 7);
+	}
+	else //ambient particle
+	{		
+		//particle.SpawnColorPhase = floor(Random(id, 2) * 3);
+		particle.SpawnColorPhase = Random(id, 2) * _RandomAmbientColor;
+	}
+
+	particle.SpawnPosition = p;
+	particle.Position = p;
+	particle.Color = 0;
+	particle.ColorPhase = 0;
+	particle.Brightness = 0;
+	particle.Velocity = 0;
+
+	if (atValidLocation) particle.Age = 0;
+	particle.Size = 0;
+	particle.MaxAge = maxAge;
+}
+
+//used to introduce more sync
+void HardReset(inout Particle particle, uint id)
+{
+	particle.Position = lerp(_Region.xy, _Region.zw, hashI13(id).xy);
+	particle.Age = 0;
+
+	particle.Velocity = 0;
+
+	particle.Color = 0;
+	particle.SpawnColorPhase = 0;
+
+	particle.SpawnPosition = particle.Position;
+	particle.Size = 0;
+
+	particle.ColorPhase = 0;
+	particle.MaxAge = 1;
+	particle.Fill = 0;
+	particle.Brightness = 0;
+}
+
+void UpdateAge(inout Particle particle, in uint id)
+{
+	//Particle left the screen //the globe zoom might send too many particles out of the screen: they can be re-used
+	if (abs(particle.Position.y) > 1.05 || abs(particle.Position.y) > abs(_Region.x) + 0.05)
+	{
+		particle.Age = 1;
+	}
+
+	particle.Age += DeltaTime / max(particle.MaxAge, 0.01);
+	
+	if (particle.Age > 1)
+	{
+		ResetParticle(particle, id);
+	}
+}
+
+void UpdateSize(inout Particle particle, in uint id, in float4 c)
+{
+	float s = _Size * lerp(1, Random(id, 3) * 2, _SizeRandomness);
+
+	// make small amount of particles way bigger
+	s *= (1 + pow(Random(id, 3), 20) * _SizeRandomness2 * 8);
+
+	//sacle in/out based on age
+	s *= smoothstep(0, _ScaleInLifetimePercentage, particle.Age) * smoothstep(1, 1 - _ScaleOutLifetimePercentage, particle.Age);
+
+	// hide particle if above target Density
+	float idPercentage = (float)id / InstanceCount;
+	s *= 1 - smoothstep(_Density - 0.01, _Density, idPercentage * 0.99);
+
+	// source strength influences size
+	s *= lerp(1, c.x * 2, _SourceModulateSize);
+
+	//far away when hitting depth that is not written
+	if (c.w <= 0.) c.w = 100.;
+	s = lerp(s, s / c.w, _DepthModulateSize);
+
+	particle.Size = lerp(s, particle.Size, _SizeLag);
+}
+
+//gamma corrected, not sure if it looks better
+
+float3 SampleGradient(in float phase)
+{
+	return Colors.SampleLevel(samplerColors, float2(phase, 0), 0).xyz;
+}
+
+void UpdateColor(inout Particle particle, in uint id, float4 source)
+{
+	float fillProbability = Random(id, 5);
+	float fill = lerp(_ParticleFill, source.x, _SourceModulateFill);
+	float t = 0.01;
+	particle.Fill = smoothstep(0., t, fill * (1. + t) - fillProbability);
+
+	float phase = 0;
+
+	phase += (particle.Age - 0.5) * 2. * _ColorOverLife;
+
+	phase += particle.SpawnColorPhase * _UseSpawnColor;
+
+	phase += source.x * _SourceModulateColor;
+
+	float brightness = lerp(1, source.x, _SourceModulateBrightness);
+
+	brightness *= lerp(1, max(1 - source.w, 0), _DepthModulateBrightness);
+
+	brightness *= lerp(1, Random(id, 6) * 2., _BrightnessRandomness);
+
+	particle.ColorPhase = lerp(phase, particle.ColorPhase, _ColorLag);
+	particle.Brightness = lerp(brightness, particle.Brightness, _BrightnessLag);
+
+	particle.Color = SampleGradient(particle.ColorPhase);
+
+	particle.Color *= particle.Brightness;
+
+	//float gg = (float)id / InstanceCount;
+	//particle.Color = fixed4(gg, gg, gg, 1);
+}
+
+
+float SampleBlurredSourced(in float2 uv, in float2 dir)
+{
+	return BlurredSource.SampleLevel(samplerBlurredSource, uv + dir * _BlurredSourceEpsilonLarge, 0).x;
+}
+
+float2 SourceAttract(in float2 position)
+{
+	float3 o = float3(-1, 0, 1);
+	float2 uv = PositionToSourceUV(position);
+	float p0 = SampleBlurredSourced(uv, o.xy);
+	float p1 = SampleBlurredSourced(uv, o.zy);
+	float p2 = SampleBlurredSourced(uv, o.yx);
+	float p3 = SampleBlurredSourced(uv, o.yz);
+	return float2(p0 - p1, p2 - p3) * -_SourceAttraction;
+}
+
+float2 MotionVectorForce(in uint id, in float3 c)
+{
+	float2 motionVector = c.yz;
+	//multiply by width of screen (height of screen == 1)
+	motionVector.x *= (_Region.z - _Region.x) * 0.5;
+	motionVector.y *= -1;
+	return motionVector * (_UseMotionVectors * lerp(1, Random(id, 5) * 2, _MotionVectorRandomness));
+}
+
+void UpdatePosition(inout Particle particle, in uint id, in float4 c) {
+
+	float2 p = particle.Position;
+	float2 v = particle.Velocity;
+
+	float2 impulse = 0;
+	
+	impulse += SourceAttract(particle.Position);
+
+	impulse += MotionVectorForce(id, c);
+
+	v = lerp(impulse, v, Inertia);
+
+	p += v;
+	
+	particle.Position = p;
+	particle.Velocity = v;
+}
+
+[numthreads(64, 1, 1)]
+void Reset(uint id : SV_DispatchThreadID)
+{
+	Particle particle = ParticleBuffer[id];
+
+	HardReset(particle, id);
+
+	ParticleBuffer[id] = particle;
+}
+
+[numthreads(64, 1, 1)]
+void Update(uint id : SV_DispatchThreadID)
+{
+	Particle particle = ParticleBuffer[id];
+
+	float4 c = GetSource(particle.Position);
+
+	UpdateAge(particle, id);
+
+	//position might have changed during Reset
+	c = GetSource(particle.Position);
+
+	UpdatePosition(particle, id, c);
+
+	UpdateSize(particle, id, c);
+
+	UpdateColor(particle, id, c);
+
+	ParticleBuffer[id] = particle;
+}
+
+
+
+
+struct CoreParticle
+{
+	float2 Position;
+	float Unused;
+	float Fill;
+
+	float3 Color;
+	float Size;
+};
+
+RWStructuredBuffer<CoreParticle> RetrieveBuffer;
+
+[numthreads(64, 1, 1)]
+void Copy(uint id : SV_DispatchThreadID)
+{
+	Particle particle = ParticleBuffer[id];
+	CoreParticle CoreParticle = RetrieveBuffer[id];
+
+	CoreParticle.Position = particle.Position;
+	CoreParticle.Fill = particle.Fill;
+	CoreParticle.Color = particle.Color;
+	CoreParticle.Size = particle.Size;
+
+	RetrieveBuffer[id] = CoreParticle;
+}
+
+
+
