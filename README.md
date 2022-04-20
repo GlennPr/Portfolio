@@ -16,7 +16,7 @@ Additionally an interface is implemented to easliy layout the drawn cards.
 
 ![CardsCreation](https://user-images.githubusercontent.com/15729395/164309788-99b80bda-7fc1-4de6-8465-75de5c65f5a8.PNG)
 
-### Scriptable References
+### [Scriptable References](https://github.com/GlennPr/Portfolio/tree/master/Unity-C%23/Scriptable-References)
 Use Scriptable objects as Reference and Event holders to be used across multiple objects.
 
 Some of the benefits include:
@@ -35,7 +35,7 @@ This provides a developer a clearer overview of the order in which materials are
 ![MaterialRenderOrder2](https://user-images.githubusercontent.com/15729395/164308266-b12b7832-9a61-4ad8-80a7-1f280a7e2542.PNG)
 
 
-### Tower Defence (acessible from 2022-04-22)
+### Tower Defence **(:sweat_smile: accessible from 2022-04-22)**
 A simple tower Defence game showcasing general project structure and script interactions in an OOP fashion.
 
 
