@@ -2,9 +2,9 @@
 
 ## About
 
-This is a code sample repository, to be viewed by anyone interested, mostly intended for job applications.
+This is a repository with small scale code samples to reflect coding style and general project structure, to be viewed by anyone interested, but mostly intended for job applications.
 
-Each sample was created with Unity Version 2021 or higher and includes a minimal project folder to be dragged and dropped into unity 
+Each sample was created with Unity Version 2021 or higher and includes a minimal project folder to be dragged and dropped into unity.
 
 
 ## Unity C#
@@ -16,6 +16,7 @@ Additionally an interface is implemented to easliy layout the drawn cards.
 
 ![CardsCreation](https://user-images.githubusercontent.com/15729395/164309788-99b80bda-7fc1-4de6-8465-75de5c65f5a8.PNG)
 
+
 ### [Scriptable References](https://github.com/GlennPr/Portfolio/tree/master/Unity-C%23/Scriptable-References)
 Use Scriptable objects as Reference and Event holders to be used across multiple objects.
 
@@ -25,8 +26,9 @@ Some of the benefits include:
 
 Aditionally there is a MaterialManager to keep material instancing to a minimum and only create new materials when needed.
 
+
 ### [MaterialRenderOrder](https://github.com/GlennPr/Portfolio/tree/master/Unity-C%23/EditorWindow-MaterialRenderOrder)
-An EditorWindow to display and organize shaders & materials within the project.
+An EditorWindow to display and organize shaders & materials within the project. **Must** use unity 2021 or higher due to chnages by Unity regarding the EditorWindow class.
 
 This provides a developer a clearer overview of the order in which materials are rendered and allows for direct editing of the renderQueue.
 
@@ -37,6 +39,8 @@ This provides a developer a clearer overview of the order in which materials are
 
 ### Tower Defence **(:sweat_smile: accessible from 2022-04-22)**
 A simple tower Defence game showcasing general project structure and script interactions in an OOP fashion.
+
+
 
 
 ## Unity Shaders
