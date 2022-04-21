@@ -2,7 +2,7 @@
 
 ## About
 
-This is a repository with small scale code samples to reflect coding style and general project structure, to be viewed by anyone interested, but mostly intended for job applications.
+This is a repository with simple & small scale code samples to reflect coding style and general project structure, to be viewed by anyone interested, but mostly intended for job applications.
 
 Each sample was created with Unity Version 2021 or higher and includes a minimal project folder to be dragged and dropped into unity.
 
