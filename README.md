@@ -6,6 +6,8 @@ This is a repository with simple & small scale code samples to reflect coding st
 
 Each sample was created with Unity Version 2021 or higher and includes a minimal project folder to be dragged and dropped into unity.
 
+To get a full overview of my portfolio visit https://glennkorver.weebly.com/ 
+
 
 ## Unity C#
 
@@ -28,7 +30,7 @@ Aditionally there is a MaterialManager to keep material instancing to a minimum 
 
 
 ### [MaterialRenderOrder](https://github.com/GlennPr/Portfolio/tree/master/Unity-C%23/EditorWindow-MaterialRenderOrder)
-An EditorWindow to display and organize shaders & materials within the project. **Must** use unity 2021 or higher due to chnages by Unity regarding the EditorWindow class.
+An EditorWindow to display and organize shaders & materials within the project. **Must** use unity 2021 or higher due to changes by Unity regarding the EditorWindow class.
 
 This provides a developer a clearer overview of the order in which materials are rendered and allows for direct editing of the renderQueue.
 
